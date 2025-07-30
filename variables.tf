@@ -112,6 +112,24 @@ variable "security_group_ids" {
   default     = []
 }
 
+variable "security_group_name" {
+  description = "Name of the security group (if not provided, will use name_prefix)"
+  type        = string
+  default     = null
+}
+
+variable "security_group_name_prefix" {
+  description = "Name prefix for the security group"
+  type        = string
+  default     = null
+}
+
+variable "security_group_description" {
+  description = "Description of the security group"
+  type        = string
+  default     = null
+}
+
 variable "security_group_ingress_rules" {
   description = "List of ingress rules for the security group"
   type = list(object({
@@ -122,6 +140,8 @@ variable "security_group_ingress_rules" {
     cidr_blocks     = list(string)
     security_groups = list(string)
     self            = bool
+    ipv6_cidr_blocks = list(string)
+    prefix_list_ids = list(string)
   }))
   default = [
     {
@@ -132,6 +152,8 @@ variable "security_group_ingress_rules" {
       cidr_blocks     = ["0.0.0.0/0"]
       security_groups = []
       self            = false
+      ipv6_cidr_blocks = []
+      prefix_list_ids = []
     }
   ]
 }
@@ -146,6 +168,8 @@ variable "security_group_egress_rules" {
     cidr_blocks     = list(string)
     security_groups = list(string)
     self            = bool
+    ipv6_cidr_blocks = list(string)
+    prefix_list_ids = list(string)
   }))
   default = [
     {
@@ -156,8 +180,16 @@ variable "security_group_egress_rules" {
       cidr_blocks     = ["0.0.0.0/0"]
       security_groups = []
       self            = false
+      ipv6_cidr_blocks = []
+      prefix_list_ids = []
     }
   ]
+}
+
+variable "security_group_tags" {
+  description = "Additional tags for the security group"
+  type        = map(string)
+  default     = {}
 }
 
 # Key Pair Configuration
@@ -180,6 +212,24 @@ variable "public_key" {
   sensitive   = true
 }
 
+variable "key_pair_name" {
+  description = "Name of the key pair (if not provided, will use name_prefix)"
+  type        = string
+  default     = null
+}
+
+variable "key_pair_name_prefix" {
+  description = "Name prefix for the key pair"
+  type        = string
+  default     = null
+}
+
+variable "key_pair_tags" {
+  description = "Additional tags for the key pair"
+  type        = map(string)
+  default     = {}
+}
+
 # IAM Configuration
 variable "create_iam_role" {
   description = "Whether to create an IAM role for the EC2 instance"
@@ -193,6 +243,60 @@ variable "iam_instance_profile_name" {
   default     = null
 }
 
+variable "iam_role_name" {
+  description = "Name of the IAM role (if not provided, will use name_prefix)"
+  type        = string
+  default     = null
+}
+
+variable "iam_role_name_prefix" {
+  description = "Name prefix for the IAM role"
+  type        = string
+  default     = null
+}
+
+variable "iam_role_description" {
+  description = "Description of the IAM role"
+  type        = string
+  default     = null
+}
+
+variable "iam_role_path" {
+  description = "Path to the IAM role"
+  type        = string
+  default     = "/"
+}
+
+variable "iam_role_max_session_duration" {
+  description = "Maximum session duration for the IAM role"
+  type        = number
+  default     = 3600
+}
+
+variable "iam_role_permissions_boundary" {
+  description = "Permissions boundary for the IAM role"
+  type        = string
+  default     = null
+}
+
+variable "iam_role_force_detach_policies" {
+  description = "Whether to force detach policies when deleting the role"
+  type        = bool
+  default     = false
+}
+
+variable "iam_instance_profile_name_prefix" {
+  description = "Name prefix for the IAM instance profile"
+  type        = string
+  default     = null
+}
+
+variable "iam_instance_profile_path" {
+  description = "Path to the IAM instance profile"
+  type        = string
+  default     = "/"
+}
+
 variable "iam_policy_statements" {
   description = "List of IAM policy statements for the EC2 role"
   type = list(object({
@@ -200,8 +304,22 @@ variable "iam_policy_statements" {
     Action    = list(string)
     Resource  = list(string)
     Condition = map(any)
+    Sid       = string
+    Principal = map(any)
   }))
   default = []
+}
+
+variable "iam_role_tags" {
+  description = "Additional tags for the IAM role"
+  type        = map(string)
+  default     = {}
+}
+
+variable "iam_instance_profile_tags" {
+  description = "Additional tags for the IAM instance profile"
+  type        = map(string)
+  default     = {}
 }
 
 # Launch Template Configuration
@@ -211,10 +329,155 @@ variable "use_launch_template" {
   default     = false
 }
 
+variable "launch_template_name" {
+  description = "Name of the launch template (if not provided, will use name_prefix)"
+  type        = string
+  default     = null
+}
+
+variable "launch_template_name_prefix" {
+  description = "Name prefix for the launch template"
+  type        = string
+  default     = null
+}
+
+variable "launch_template_description" {
+  description = "Description of the launch template"
+  type        = string
+  default     = null
+}
+
+variable "launch_template_update_default_version" {
+  description = "Whether to update the default version of the launch template"
+  type        = bool
+  default     = true
+}
+
+variable "launch_template_disable_api_stop" {
+  description = "Whether to disable API stop for the launch template"
+  type        = bool
+  default     = false
+}
+
+variable "launch_template_disable_api_termination" {
+  description = "Whether to disable API termination for the launch template"
+  type        = bool
+  default     = false
+}
+
+variable "launch_template_instance_initiated_shutdown_behavior" {
+  description = "Shutdown behavior for the launch template"
+  type        = string
+  default     = "stop"
+
+  validation {
+    condition     = contains(["stop", "terminate"], var.launch_template_instance_initiated_shutdown_behavior)
+    error_message = "Shutdown behavior must be either 'stop' or 'terminate'."
+  }
+}
+
+variable "launch_template_kernel_id" {
+  description = "Kernel ID for the launch template"
+  type        = string
+  default     = null
+}
+
+variable "launch_template_ram_disk_id" {
+  description = "RAM disk ID for the launch template"
+  type        = string
+  default     = null
+}
+
+variable "launch_template_instance_requirements" {
+  description = "Instance requirements for the launch template"
+  type = object({
+    accelerator_count = object({
+      min = number
+      max = number
+    })
+    accelerator_manufacturers = list(string)
+    accelerator_names = list(string)
+    accelerator_total_memory_mib = object({
+      min = number
+      max = number
+    })
+    accelerator_types = list(string)
+    allowed_instance_types = list(string)
+    bare_metal = string
+    baseline_ebs_bandwidth_mbps = object({
+      min = number
+      max = number
+    })
+    burstable_performance = string
+    cpu_manufacturers = list(string)
+    excluded_instance_types = list(string)
+    instance_generations = list(string)
+    local_storage = string
+    local_storage_types = list(string)
+    max_spot_price_as_percentage_of_optimal_on_demand_price = number
+    memory_gib_per_vcpu = object({
+      min = number
+      max = number
+    })
+    memory_mib = object({
+      min = number
+      max = number
+    })
+    network_bandwidth_gbps = object({
+      min = number
+      max = number
+    })
+    network_interface_count = object({
+      min = number
+      max = number
+    })
+    on_demand_max_price_percentage_over_lowest_price = number
+    require_hibernate_support = bool
+    spot_max_price_percentage_over_lowest_price = number
+    total_local_storage_gb = object({
+      min = number
+      max = number
+    })
+    vcpu_count = object({
+      min = number
+      max = number
+    })
+  })
+  default = null
+}
+
+variable "launch_template_license_specification" {
+  description = "License specification for the launch template"
+  type = list(object({
+    license_configuration_arn = string
+  }))
+  default = []
+}
+
+variable "launch_template_maintenance_options" {
+  description = "Maintenance options for the launch template"
+  type = object({
+    auto_recovery = string
+  })
+  default = null
+}
+
+variable "launch_template_private_dns_name_options" {
+  description = "Private DNS name options for the launch template"
+  type = object({
+    enable_resource_name_dns_aaaa_record = bool
+    enable_resource_name_dns_a_record    = bool
+    hostname_type                        = string
+  })
+  default = null
+}
+
 variable "block_device_mappings" {
   description = "List of block device mappings for the launch template"
   type = list(object({
     device_name = string
+    no_device   = bool
+    virtual_name = string
     ebs = object({
       delete_on_termination = bool
       encrypted             = bool
@@ -240,6 +503,16 @@ variable "network_interfaces" {
     private_ip_address          = string
     subnet_id                   = string
     groups                      = list(string)
+    ipv4_prefix_count           = number
+    ipv4_prefixes               = list(string)
+    ipv6_address_count          = number
+    ipv6_addresses              = list(string)
+    ipv6_prefix_count           = number
+    ipv6_prefixes               = list(string)
+    network_card_index          = number
+    primary_private_ip_address  = string
+    secondary_private_ip_address_count = number
+    secondary_private_ip_addresses    = list(string)
   }))
   default = []
 }
@@ -340,6 +613,12 @@ variable "disable_api_termination" {
   default     = false
 }
 
+variable "disable_api_stop" {
+  description = "Whether to disable API stop"
+  type        = bool
+  default     = false
+}
+
 variable "instance_initiated_shutdown_behavior" {
   description = "Shutdown behavior for the instance"
   type        = string
@@ -355,6 +634,41 @@ variable "placement_group" {
   description = "Placement group for the instance"
   type        = string
   default     = null
+}
+
+variable "create_placement_group" {
+  description = "Whether to create a placement group"
+  type        = bool
+  default     = false
+}
+
+variable "placement_group_name" {
+  description = "Name of the placement group"
+  type        = string
+  default     = null
+}
+
+variable "placement_group_strategy" {
+  description = "Strategy for the placement group"
+  type        = string
+  default     = "cluster"
+
+  validation {
+    condition     = contains(["cluster", "partition", "spread"], var.placement_group_strategy)
+    error_message = "Placement group strategy must be one of: cluster, partition, spread."
+  }
+}
+
+variable "placement_group_partition_count" {
+  description = "Number of partitions for the placement group"
+  type        = number
+  default     = null
+}
+
+variable "placement_group_tags" {
+  description = "Tags for the placement group"
+  type        = map(string)
+  default     = {}
 }
 
 variable "tenancy" {
@@ -412,11 +726,76 @@ variable "capacity_reservation_target" {
   default = null
 }
 
+# Spot Instance Configuration
+variable "spot_price" {
+  description = "Maximum price to pay for spot instances"
+  type        = string
+  default     = null
+}
+
+variable "spot_type" {
+  description = "Type of spot request"
+  type        = string
+  default     = "one-time"
+
+  validation {
+    condition     = contains(["one-time", "persistent"], var.spot_type)
+    error_message = "Spot type must be either 'one-time' or 'persistent'."
+  }
+}
+
+variable "spot_launch_group" {
+  description = "Launch group for spot instances"
+  type        = string
+  default     = null
+}
+
+variable "spot_block_duration_minutes" {
+  description = "Block duration in minutes for spot instances"
+  type        = number
+  default     = null
+}
+
+variable "spot_valid_from" {
+  description = "Valid from time for spot instances"
+  type        = string
+  default     = null
+}
+
+variable "spot_valid_until" {
+  description = "Valid until time for spot instances"
+  type        = string
+  default     = null
+}
+
+variable "spot_instance_interruption_behavior" {
+  description = "Behavior when spot instance is interrupted"
+  type        = string
+  default     = "terminate"
+
+  validation {
+    condition     = contains(["hibernate", "stop", "terminate"], var.spot_instance_interruption_behavior)
+    error_message = "Spot instance interruption behavior must be one of: hibernate, stop, terminate."
+  }
+}
+
 # Auto Scaling Group Configuration
 variable "create_autoscaling_group" {
   description = "Whether to create an Auto Scaling Group"
   type        = bool
   default     = false
+}
+
+variable "asg_name" {
+  description = "Name of the Auto Scaling Group (if not provided, will use name_prefix)"
+  type        = string
+  default     = null
+}
+
+variable "asg_name_prefix" {
+  description = "Name prefix for the Auto Scaling Group"
+  type        = string
+  default     = null
 }
 
 variable "asg_desired_capacity" {
@@ -539,6 +918,11 @@ variable "mixed_instances_policy" {
     override = list(object({
       instance_type     = string
       weighted_capacity = number
+      launch_template_specification = object({
+        launch_template_id   = string
+        launch_template_name = string
+        version              = string
+      })
     }))
   })
   default = null

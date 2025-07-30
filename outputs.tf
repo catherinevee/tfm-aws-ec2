@@ -119,6 +119,11 @@ output "instance_disable_api_terminations" {
   value       = aws_instance.ec2[*].disable_api_termination
 }
 
+output "instance_disable_api_stops" {
+  description = "List of API stop disable configurations for the EC2 instances"
+  value       = aws_instance.ec2[*].disable_api_stop
+}
+
 output "instance_initiated_shutdown_behaviors" {
   description = "List of instance initiated shutdown behaviors for the EC2 instances"
   value       = aws_instance.ec2[*].instance_initiated_shutdown_behavior
@@ -132,6 +137,32 @@ output "instance_monitorings" {
 output "instance_tags" {
   description = "List of tags for the EC2 instances"
   value       = aws_instance.ec2[*].tags
+}
+
+# Placement Group Outputs
+output "placement_group_id" {
+  description = "ID of the placement group created for the EC2 instance"
+  value       = var.create_placement_group ? aws_placement_group.ec2[0].id : null
+}
+
+output "placement_group_name" {
+  description = "Name of the placement group created for the EC2 instance"
+  value       = var.create_placement_group ? aws_placement_group.ec2[0].name : null
+}
+
+output "placement_group_arn" {
+  description = "ARN of the placement group created for the EC2 instance"
+  value       = var.create_placement_group ? aws_placement_group.ec2[0].arn : null
+}
+
+output "placement_group_strategy" {
+  description = "Strategy of the placement group created for the EC2 instance"
+  value       = var.create_placement_group ? aws_placement_group.ec2[0].strategy : null
+}
+
+output "placement_group_tags" {
+  description = "Tags of the placement group created for the EC2 instance"
+  value       = var.create_placement_group ? aws_placement_group.ec2[0].tags : null
 }
 
 # Security Group Outputs
@@ -227,6 +258,26 @@ output "iam_role_create_date" {
   value       = var.create_iam_role ? aws_iam_role.ec2[0].create_date : null
 }
 
+output "iam_role_description" {
+  description = "Description of the IAM role created for the EC2 instance"
+  value       = var.create_iam_role ? aws_iam_role.ec2[0].description : null
+}
+
+output "iam_role_path" {
+  description = "Path of the IAM role created for the EC2 instance"
+  value       = var.create_iam_role ? aws_iam_role.ec2[0].path : null
+}
+
+output "iam_role_max_session_duration" {
+  description = "Maximum session duration of the IAM role created for the EC2 instance"
+  value       = var.create_iam_role ? aws_iam_role.ec2[0].max_session_duration : null
+}
+
+output "iam_role_permissions_boundary" {
+  description = "Permissions boundary of the IAM role created for the EC2 instance"
+  value       = var.create_iam_role ? aws_iam_role.ec2[0].permissions_boundary : null
+}
+
 output "iam_role_tags" {
   description = "Tags of the IAM role created for the EC2 instance"
   value       = var.create_iam_role ? aws_iam_role.ec2[0].tags : null
@@ -251,6 +302,11 @@ output "iam_instance_profile_arn" {
 output "iam_instance_profile_role" {
   description = "Role name of the IAM instance profile created for the EC2 instance"
   value       = var.create_iam_role ? aws_iam_instance_profile.ec2[0].role : null
+}
+
+output "iam_instance_profile_path" {
+  description = "Path of the IAM instance profile created for the EC2 instance"
+  value       = var.create_iam_role ? aws_iam_instance_profile.ec2[0].path : null
 }
 
 output "iam_instance_profile_tags" {
@@ -363,6 +419,36 @@ output "launch_template_tag_specifications" {
 output "launch_template_tags" {
   description = "Tags of the launch template created for the EC2 instance"
   value       = var.use_launch_template ? aws_launch_template.ec2[0].tags : null
+}
+
+output "launch_template_description" {
+  description = "Description of the launch template created for the EC2 instance"
+  value       = var.use_launch_template ? aws_launch_template.ec2[0].description : null
+}
+
+output "launch_template_disable_api_stop" {
+  description = "Disable API stop setting of the launch template created for the EC2 instance"
+  value       = var.use_launch_template ? aws_launch_template.ec2[0].disable_api_stop : null
+}
+
+output "launch_template_disable_api_termination" {
+  description = "Disable API termination setting of the launch template created for the EC2 instance"
+  value       = var.use_launch_template ? aws_launch_template.ec2[0].disable_api_termination : null
+}
+
+output "launch_template_instance_initiated_shutdown_behavior" {
+  description = "Instance initiated shutdown behavior of the launch template created for the EC2 instance"
+  value       = var.use_launch_template ? aws_launch_template.ec2[0].instance_initiated_shutdown_behavior : null
+}
+
+output "launch_template_kernel_id" {
+  description = "Kernel ID of the launch template created for the EC2 instance"
+  value       = var.use_launch_template ? aws_launch_template.ec2[0].kernel_id : null
+}
+
+output "launch_template_ram_disk_id" {
+  description = "RAM disk ID of the launch template created for the EC2 instance"
+  value       = var.use_launch_template ? aws_launch_template.ec2[0].ram_disk_id : null
 }
 
 # Auto Scaling Group Outputs
